@@ -1,6 +1,6 @@
 # Streaming App
 
-![Streaming App](https://example.com/path-to-your-image.png) <!-- Remplacez par le lien de votre image -->
+![Streaming App](images/movibookdownloader.png) <!-- Remplacez par le lien de votre image -->
 
 ## Description
 
@@ -64,7 +64,7 @@ Une application web de streaming gratuite inspirée de Netflix, permettant aux u
 1. Accédez au répertoire du frontend :
 
     ```bash
-    cd ../frontend
+    cd ../app
     ```
 
 2. Installez les dépendances :
@@ -94,9 +94,4 @@ Ce projet est sous la licence [MIT](LICENSE).
 
 ## Contact
 
-Pour toute question, vous pouvez me contacter à [email@example.com](mailto:email@example.com).
-
-
-
-# MovieBook
-application web de streaming gratuite, similaire à Netflix, qui permet non seulement de visionner et télécharger des films et séries, mais aussi de personnaliser les recommandations, d'interagir avec d'autres utilisateurs, et même de vendre des recommandations ou des playlists sur YouTube
+Pour toute question, vous pouvez me contacter à [kwadjoaoukou@example.com](mailto:kwadjoaoukou@example.com).
