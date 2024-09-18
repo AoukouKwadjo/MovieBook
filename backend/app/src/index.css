@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Your custom styles */
+
+.backdrop-blur-sm{
+    backdrop-filter: blur(1px);
+}
+.bg-red-600{
+    background-color: red;
+}
+.via-red-900{
+    --tw-gradient-stops: var(--tw-gradient-from), #310000 var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+.shadow-light{
+    box-shadow: 0px 0px 15px red;
+}
+.shadow-black-light{
+    box-shadow: 0px 0px 15px rgb(27, 27, 27);
+}
+.bg-red-800{
+    background: #ae0000;
+}
+
+@layer utilities {
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      .no-scrollbar::-webkit-scrollbar {
+          display: none;
+      }
+     /* Hide scrollbar for IE, Edge and Firefox */
+      .no-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+    }
+  }
