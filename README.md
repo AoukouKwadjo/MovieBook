@@ -1,6 +1,6 @@
 # Streaming App
 
-![Streaming App](images/moviebookdownload.png) 
+![Streaming App](images/movieBookdownload.png) 
 
 ## Description
 
