@@ -1,6 +1,10 @@
 # Streaming App
 
+<<<<<<< Updated upstream
 ![Streaming App](http://http://aoukoukwadjo.free.nf/moviebook.png) <!-- Remplacez par le lien de votre image -->
+=======
+![Streaming App](http://aoukoukwadjo.free.nf/moviebook.png) <!-- Remplacez par le lien de votre image -->
+>>>>>>> Stashed changes
 
 ## Description
 
