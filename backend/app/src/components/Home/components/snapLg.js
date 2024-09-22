@@ -1,36 +1,52 @@
-import React from 'react';
+import React,{useEffect, useState} from 'react';
 import ItemLg from './itemLg';
+import ApiService from '../../apiService';
+
 
 const SnapLg = (props) => {
-    const titles = props.title; 
-    const nbre= props.nbre ? props.nbre : 1
     const snaper = [];
     const items = [];
-    const toggleModal=props.toggleModal
+    const toggleModal=props.modal
+    const [popularMovies, setPopularMovies] = useState([]);
+    const [page, setPage] = useState(1);
+    const [genre, setGenre] = useState(props.genre);
+
+    useEffect(() => {
+        const fetchMovies = async () => {
+        
+            try {
+                const data = await ApiService.fetchPopularMovies(page,genre);
+                setPopularMovies(data);
+            } catch (error) {
+                console.error('Error fetching popular movies:', error);
+            } 
+        };
+    
+        fetchMovies();
+    }, [page]);
 
 
     const modal=(params)=>{
         toggleModal(params)
     }
 
-    for (let i = 0; i < 10; i++) {
+    console.log(popularMovies)
+    
+    popularMovies.map((movie,i) => (
         items.push(
-            <ItemLg key={i} modals={modal}/>
-        );
-    }
+            <ItemLg key={i} movie={movie} modals={modal} />
+        ))
+    )
 
-    for (let i = 0; i < nbre; i++) {
-        snaper.push(
-            <ul class="flex snap-x snap-mandatory gap-x-4 md:gap-x-8 overflow-x-auto pb-6 no-scrollbar">
-                {items}
-            </ul>
-        );
-    }
+    snaper.push(
+        <ul key={this} className="flex snap-x snap-mandatory gap-x-4 md:gap-x-8 overflow-x-auto pb-6 no-scrollbar">
+            {items}
+        </ul>      
+    );
 
     return (
-        <div>
-            <div class="space-y-6 pt-10 px-5 md:px-10">
-                <h2 class="text-xl md:text-3xl md:ml-20 font-semibold text-white capitalize">{titles}</h2>
+        <div className=''>
+            <div class="space-y-6 w-full px-5">
                 {snaper}
             </div>
         </div>

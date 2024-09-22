@@ -1,17 +1,18 @@
 from django.urls import path, include
 from api.views import (
-    MovieListView, PopularMovieListView, LikedMovieListView,
+    MovieListView, LikedMovieListView,
     PlaylistListView, LikeMovieView, AddToPlaylistView, IncrementViewCountView,
     WatchMovieView, DownloadMovieView, GenreListView, ThemeListView,
     TopRatedMoviesView, UpcomingMoviesView,
     MoviesByGenreView, PopularTVShowsView,
     TopRatedTVShowsView, TVShowsByGenreView, TVShowDetailsView,
-    PersonDetailsView, SearchView
+    PersonDetailsView, SearchView, MovieDetailView, MovieCommentView
 )
 
 urlpatterns = [
-    path('movies/', MovieListView.as_view(), name='movie-list'),
-    path('movies/popular/', PopularMovieListView.as_view(), name='popular-movie-list'),
+    path('movies/movie-list', MovieListView.as_view(), name='movie-list'),
+    path('movies/', MovieDetailView.as_view(), name='movie-details'),
+    path('comments/', MovieCommentView.as_view(), name='movie-comments'),
     path('movies/liked/', LikedMovieListView.as_view(), name='liked-movie-list'),
     path('playlists/', PlaylistListView.as_view(), name='playlist-list'),
     path('movies/<int:movie_id>/download/', DownloadMovieView.as_view(), name='download-movie'),

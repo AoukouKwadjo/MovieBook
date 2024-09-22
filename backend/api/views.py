@@ -8,6 +8,9 @@ from .models import Movie, Playlist, LikedMovie, Genre, Theme
 from .serializers import MovieSerializer, PlaylistSerializer, LikedMovieSerializer, GenreSerializer, ThemeSerializer
 from .tmdb_service import TMDBService
 import telegram
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -29,11 +32,118 @@ class ObtainAuthToken(APIView):
         return Response({'token': token.key}, status=status.HTTP_200_OK)
 
 
+class MovieDetailView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+
+        movie_id = request.query_params.get('movie_id')
+
+        # Cherche le film avec l'identifiant spécifié dans la base de données
+        movie = Movie.objects.filter(tmdb_id=movie_id).first()
+
+        if not movie:
+            # Si le film n'existe pas, renvoyer une erreur 404
+            return Response({'error': 'Movie not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Récupérer les détails du film depuis TMDB
+        tmdb_data = TMDBService.get_movie_details(movie_id)
+        if not tmdb_data:
+            return Response({'error': 'Failed to fetch movie details from TMDB'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Extraire les détails du film depuis tmdb_data
+        production_list = TMDBService.get_production(movie_id)
+        title = tmdb_data.get('title', '')
+        tag = tmdb_data.get('tagline', '')
+        duree = tmdb_data.get('runtime', 0)
+        description = tmdb_data.get('overview', '')
+        production = ', '.join([company['name'] for company in production_list])
+        studio = production_list[0]['name'] if production_list else ''
+        original_language = tmdb_data.get('original_language', '')
+        original_title = tmdb_data.get('original_title', '')
+        poster_path = tmdb_data.get('poster_path', '')
+        backdrop_path = tmdb_data.get('backdrop_path', '')
+        vote_average = tmdb_data.get('vote_average', 0)
+        adult = tmdb_data.get('adult', False)
+        date = tmdb_data.get('release_date', None)
+        genres = tmdb_data.get('genres', [])
+        themes = tmdb_data.get('genres', [])
+
+        # Met à jour les informations du film existant
+        movie.title = title
+        movie.tag = tag
+        movie.duree = duree
+        movie.description = description
+        movie.production = production
+        movie.studio = studio
+        movie.original_langage = original_language
+        movie.original_title = original_title
+        movie.poster_path = poster_path
+        movie.backdrop_path = backdrop_path
+        movie.vote_average = vote_average
+        if (adult):
+            movie.age = 18
+        else:
+            movie.age=7
+        
+        movie.date = date
+
+        # Met à jour les genres et thèmes
+        movie.genres.clear()
+        for genre_data in genres:
+            genre, _ = Genre.objects.get_or_create(id=genre_data['id'], defaults={'name': genre_data['name']})
+            movie.genres.add(genre)
+
+        movie.themes.clear()
+        for theme_data in themes:
+            theme, _ = Theme.objects.get_or_create(id=theme_data['id'], defaults={'name': theme_data['name']})
+            movie.themes.add(theme)
+
+        movie.save()
+
+        # Sérialiser les détails du film
+        serializer = MovieSerializer(movie)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class MovieCommentView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        movie_id = request.query_params.get('movie_id')
+
+        # Vérifier si l'ID du film est fourni
+        if not movie_id:
+            return Response({'error': 'Movie ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Récupérer les commentaires du film depuis TMDB
+        tmdb_comments = TMDBService.get_movie_comment(movie_id)
+        if not tmdb_comments:
+            return Response({'error': 'Failed to fetch movie comments from TMDB'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Extraire et formater les commentaires
+        comments = []
+        for comment in tmdb_comments['results']:
+            comments.append({
+                'name': comment.get('author', 'Unknown'),
+                'content': comment.get('content', ''),
+                'avatar': comment.get('author_details', {}).get('avatar_path', ''),
+                'date': comment.get('created_at', ''),
+                'url': comment.get('url', '')
+            })
+        
+        # Retourner les commentaires formatés dans la réponse
+        return Response({'comments': comments}, status=status.HTTP_200_OK)
+    
+    
 class MovieListView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        tmdb_data = TMDBService.get_popular_movies()
+        # Vérifie si 'sortCriteria' est présent dans la requête et s'il n'est pas vide
+        page = request.query_params.get('page', 1)
+        genre = request.query_params.get('genre', '')
+        tmdb_data = TMDBService.get_popular_movies(page=page, genre=genre)
+        
         
         if tmdb_data:
             movies = tmdb_data.get('results', [])
@@ -46,34 +156,36 @@ class MovieListView(APIView):
                 production_list=TMDBService.get_production(tmdb_id)
 
                 title = movie_data['title']
-                description = movie_data['overview']
+                # description = movie_data['overview']
 
-                production = ', '.join([company['name'] for company in production_list])
-                studio = production_list[0]['name'] if production_list else ''
-                age = movie_data.get('age', None)
-                genres = movie_data['genre_ids']
-                themes = []  # Assuming themes are not available in the API response and will be assigned later
+                # production = ', '.join([company['name'] for company in production_list])
+                # studio = production_list[0]['name'] if production_list else ''
+                # adult = movie_data.get('adult', None)
+                # genres = movie_data['genre_ids']
+                poster_path= movie_data['poster_path']
+                backdrop_path=movie_data['backdrop_path']
+                vote_average=movie_data['vote_average']
+                date=movie_data['release_date']
 
                 movie, created = Movie.objects.get_or_create(
                     tmdb_id=tmdb_id,
                     defaults={
                         'title': title,
-                        'description': description,
-                        'production': production,
-                        'studio': studio,
-                        'age': age,
+                        # 'description': description,
+                        # 'production': production,
+                        # 'studio': studio,
+                        # 'adult': adult,
+                        'date': date,
+                        'vote_average': vote_average,
+                        'poster_path': poster_path,
+                        'backdrop_path': backdrop_path,
                     }
                 )
 
-                if created:
-                    for genre_id in genres:
-                        genre, _ = Genre.objects.get_or_create(id=genre_id, defaults={'name': 'Unknown'})  # Adjust according to your Genre model
-                        movie.genres.add(genre)
-
-                    # Add themes to the movie if available
-                    for theme_name in themes:
-                        theme, _ = Theme.objects.get_or_create(name=theme_name)
-                        movie.themes.add(theme)
+                # if created:
+                #     for genre_id in genres:
+                #         genre, _ = Genre.objects.get_or_create(id=genre_id, defaults={'name': 'Unknown'})  # Adjust according to your Genre model
+                #         movie.genres.add(genre)
 
                 added_movies.append(movie)
                 
@@ -91,12 +203,6 @@ class MovieListView(APIView):
             return Response(serialized_data, status=status.HTTP_200_OK)
 
         return Response({'error': 'Failed to fetch movies from TMDB'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class PopularMovieListView(generics.ListAPIView):
-    serializer_class = MovieSerializer
-    permission_classes = [AllowAny]
-
 
 class GenreListView(generics.ListAPIView):
     queryset = Genre.objects.all()

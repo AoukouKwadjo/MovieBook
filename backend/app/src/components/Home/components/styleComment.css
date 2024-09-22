@@ -1,0 +1,14 @@
+.comment-content strong {
+    font-weight: bold;
+    color: red;
+}
+
+.comment-content em {
+    font-style: italic;
+    color: blue;
+}
+
+.comment-content a {
+    color: green;
+    text-decoration: underline;
+}
