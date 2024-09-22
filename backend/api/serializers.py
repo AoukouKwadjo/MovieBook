@@ -2,8 +2,8 @@ from rest_framework import serializers
 from .models import Movie, Playlist, LikedMovie, Genre, Theme, TVShow, Person
 
 class MovieSerializer(serializers.ModelSerializer):
-    # genres = serializers.StringRelatedField(many=True)
-    # themes = serializers.StringRelatedField(many=True)
+    genres = serializers.StringRelatedField(many=True)
+    themes = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Movie

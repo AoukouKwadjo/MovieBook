@@ -16,9 +16,13 @@ const apiService = axios.create({
 });
   
 const ApiService = { 
-  fetchMovies: async () => {
+  fetchMovies: async (movie_id) => {
     try {
-      const response = await apiService.get('movies/');
+      const response = await apiService.get('movies/', {
+        params: {
+          movie_id: movie_id,
+        }, 
+      });
       return response.data; 
     } catch (error) {
       console.error('Error fetching movies:', error);
@@ -26,10 +30,29 @@ const ApiService = {
     }
   },
 
-  fetchPopularMovies: async () => {
+  fetchComments: async (movie_id) => {
     try {
-      const response = await apiService.get('movies/');
-      console.log(response.data)
+      const response = await apiService.get('comments/', {
+        params: {
+          movie_id: movie_id,
+        }, 
+      });
+      return response.data.comments; 
+    } catch (error) {
+      console.error('Error fetching movies:', error);
+      throw error;
+    }
+  },
+
+  fetchPopularMovies: async (page, genre) => {
+    try {
+      const response = await apiService.get('movies/movie-list', {
+        params: {
+          page: page,
+          genre: genre,
+          language: 'fr-FR',
+        }, 
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching popular movies:', error);
